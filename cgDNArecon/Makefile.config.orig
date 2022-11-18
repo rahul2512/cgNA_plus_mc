@@ -1,0 +1,31 @@
+# The required environment variables
+
+# Choose the compiler and compilation flags according to the needs
+CXX = g++
+CXXFLAGS = -Wall -O2 -fPIC -Wfatal-errors
+
+# The location of the algebra3d library
+ALG3D_DIR       = ...
+
+# Any additional includes (-I/.../...)
+# This project requires:
+# algebra3d (as defined)
+ADDITIONAL_INC = -I$(ALG3D_DIR)/include
+
+# Any additional linker flags (-L/.../... -l...)
+# # algebra3d (as defined)
+ADDITIONAL_LDFLAGS = -L$(ALG3D_DIR)/lib -lalgebra3d
+
+###############################################################################
+# TESTS
+
+# Any additional includes (-I/.../...) for tests
+# This project requires:
+# CppUnit
+ADDITIONAL_INC_TEST =
+
+# Any additional linker flags (-L/.../... -l...) for tests
+# This project requires:
+# CppUnit (e.g. -lcppunit)
+ADDITIONAL_LDFLAGS_TEST = -lcppunit
+

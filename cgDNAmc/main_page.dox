@@ -1,0 +1,434 @@
+/**
+ * @mainpage
+ *
+ * @section sec_desc Description
+ *
+ * This package allows for running Monte Carlo (MC) simulations of DNA molecules
+ * using the <a href="http://lcvmwww.epfl.ch/cgDNA">cgDNA</a> nearest-neighbour
+ * rigid base model.
+ * The code allows for direct MC sampling from a Gaussian distribution. It is
+ * also possible to include a perturbation from pure Gaussian using the
+ * Metropolis MC method.
+ * For details about the results obtained using the software see the journal
+ * article in section @ref sec_cite.
+ *
+ * The code has been divided into 3 main modules:
+ *     @li @ref grp_helpers
+ *     @li @ref grp_random
+ *     @li @ref grp_cgDNAutils
+ *
+ * Code for two binaries is also included:
+ *     @li @ref build_seq_data.cpp -- can be used to prepare
+ *     <a href="http://lcvmwww.epfl.ch/cgDNA">cgDNA</a> coefficients
+ *     for a given DNA sequence using a given
+ *     <a href="http://lcvmwww.epfl.ch/cgDNA">cgDNA</a> parameter set.
+ *     @li @ref run_cgDNAmc.cpp -- is code for running the Monte Carlo
+ *     simulations. As input it takes coefficients generated e.g. as in
+ *     @ref build_seq_data.cpp.
+ *
+ * @section sec_theory Theory
+ * This section provides a very brief description of the main principles of
+ * Monte Carlo simulations as implemented by this package. For more details see
+ * the journal article in section @ref sec_cite.
+ *
+ * The code runs either direct Monte Carlo (MC) simulations for a pure Gaussian
+ * random model with a probability density function:
+ * @f[
+ p(\mathbf{w}) = \frac{1}{Z} e^{-\frac{1}{2}(\mathbf{w} - \widehat{\mathbf{w}})
+ \cdot K(\mathbf{w} - \widehat{\mathbf{w}})} \quad,
+ @f]
+ * with first moment @f$\widehat{\mathbf{w}}@f$, second moment @f$K^{-1}@f$
+ * and normalizing constant @f$Z@f$.
+ * It also allows runs of Metropolis MC for a perturbed Gaussian:
+ * @f[
+ \widetilde{p}(\mathbf{w}) = \frac{1}{Z} J(\mathbf{w})
+ e^{-\frac{1}{2}(\mathbf{w} - \widehat{\mathbf{w}})
+ \cdot K(\mathbf{w} - \widehat{\mathbf{w}})}
+ @f]
+ *
+ * In particular, here an example of the pure Gaussian is the
+ * <a href="http://lcvmwww.epfl.ch/cgDNA">cgDNA</a> nearest neighbour rigid base
+ * model of DNA. The perturbation @f$J(\mathbf{w})@f$ used as an example in the
+ * code is the Jacobian of a <a href="http://lcvmwww.epfl.ch/cgDNA">cgDNA</a>
+ * configuration:
+ @f[
+ J(\mathbf{w}) =  \prod_{i=1}^{2N-1} \left(1 + \frac{\zeta_i^2}{100}\right)^{-2}
+ @f]
+ * where @f$N@f$ is the number of base pairs and @f$\zeta_i@f$ are norms of the
+ * intra and inter rotation parts of @f$\mathbf{w}@f$.
+ *
+ * @subsection sec_direct_mc Direct Monte Carlo sampling
+ *
+ * Input data for every simulation consists of the
+ * <a href="http://lcvmwww.epfl.ch/cgDNA">cgDNA</a>
+ * stiffness matrix @f$K@f$ and shape vector @f$\widehat{\mathbf{w}}@f$ for a
+ * chosen DNA sequence, which define the probability density function
+ * @f$p(\mathbf{w})@f$ as previously defined.
+ *
+ * Consider Cholesky decomposition of the stiffness matrix @f$K=LL^T@f$, with
+ * lower triangular factor @f$L@f$ of the same bandwidth as @f$K@f$. This
+ * decomposition allows for the change of variable
+ * @f$\mathbf{y} = L^{T}(\mathbf{w} - \widehat{\mathbf{w}})@f$ so that the
+ * probability @f$p(\mathbf{w})@f$ can be rewritten as:
+ * @f[
+ p_{\mathbf{y}}(\mathbf{y})
+ = \frac{1}{Z} e^{-\frac{1}{2}\mathbf{y} \cdot \mathbf{y}}
+ = \frac{1}{\sqrt{2\pi}}\prod_{i=1}^N e^{-y_i^2}
+ @f]
+ * i.e. as a product of independent univariate normals.
+ *
+ * As a result each MC draw begins with generation of a random vector
+ * @f$\mathbf{y}@f$ with each component drawn independently from a normal
+ * distribution. A <a href="http://lcvmwww.epfl.ch/cgDNA">cgDNA</a>
+ * configuration @f$\mathbf{w}@f$ is then recovered from @f$\mathbf{y}@f$ in
+ * two steps: @f$L^{T}\mathbf{x} = \mathbf{y}@f$ (a banded triangular linear
+ * solve) and @f$\mathbf{w} = \mathbf{x} + \widehat{\mathbf{w}}@f$.
+ *
+ * A similar change of variable is possible using the spectral decomposition
+ * @f$K=PDP^T@f$ (with @f$P@f$ orthogonal and @f$D@f$ diagonal). This yields:
+ * @f[
+ \mathbf{w} = PD^{-\frac{1}{2}}\mathbf{y} + \widehat{\mathbf{w}} \quad.
+ @f]
+ * Cholesky decomposition is preferred here as it preserves the sparse
+ * structure of the stiffness matrix @f$K@f$.
+ *
+ * @subsection sec_metropolis_mc Metropolis Monte Carlo
+ *
+ * The Metropolis algorithm is used to include a perturbation from pure Gaussian,
+ * as in the probability density function @f$\widetilde{p}(\mathbf{w})@f$.
+ * Given a prior configuration @f$\mathbf{w}@f$ a new configuration
+ * @f$\mathbf{w}*@f$ is generated using @ref sec_direct_mc. If
+ * @f$J(\mathbf{w}^*) \geq J(\mathbf{w})@f$ is accepted (included in the computed
+ * ensemble). Otherwise it is accepted with probability
+ * @f$\frac{J(\mathbf{w}^*)}{J(\mathbf{w})}@f$.
+ * When @f$\mathbf{w}^*@f$ is not accepted, then @f$\mathbf{w}@f$ is added once
+ * again to the ensemble.
+ *
+ * @subsection sec_expect Computed expectations
+ *
+ * Three kinds of observables can be computed using the package:
+ *     - expectations tangent-tangent correlations at each base pair @f$i@f$
+ *     calculated as
+ *     @f$\langle {\bf t}^{[k]}_0 \cdot {\bf t}^{[k]}_i \rangle@f$,
+ *     where the tangents are defined as:
+ *         - @f${\bf t}^{[0]}@f$ -- the base pair normal (see @ref compute_t0)
+ *         - @f${\bf t}^{[1]}@f$ -- the unit chord between subsequent base pairs
+ *         (see @ref compute_t1)
+ *         - @f${\bf t}^{[k]}@f$ for @f$k > 1@f$ -- the generalized chord
+ *         (see @ref compute_tk)
+ *     - expectations of (generalized) arclengths
+ *     @f$\langle {\bf s}^{[k]}_i \rangle@f$ at each base pair @f$i@f$, for
+ *     @f$k > 1@f$ (see @ref compute_sk)
+ *     - Flory persistence vectors
+ *     @f$\langle {\bf R}_0^T({\bf r}_i - {\bf r}_0) \rangle@f$
+ *     (see @ref compute_r)
+ *
+ * @note Both (generalized) arclengths and Flory persistence vectors are
+ * expressed in Angstroms as these are the units used in the
+ * <a href="http://lcvmwww.epfl.ch/cgDNA">cgDNA</a> model.
+ *
+ * Each expected value is calculated as an average of the values calculated for
+ * all the configurations generated during a simulation run.
+ *
+ * @note A number of base pairs at either end of a generated configuration is
+ * ignored to avoid end effects. The base pair index @f$i@f$ in the above
+ * formulae is defined so that the first base pair that is not dropped has
+ * index 0.
+ *
+ * See @ref run_cgDNAmc.cpp for instructions how to choose which expectations
+ * are to be computed.
+ *
+ * @section sec_download Download
+ *
+ * The cgDNAmc package can be obtained either by cloning the static
+ * <a href="http://mercurial.selenic.com/">Mercurial 2.8.1</a> repository:
+ * @verbatim
+ hg clone http://lcvmwww.epfl.ch/software/cgDNAmc/repo cgDNAmc
+ @endverbatim
+ * or downloading a
+ * <a href="http://lcvmwww.epfl.ch/software/cgDNAmc/cgDNAmc.zip">ZIP archive</a>.
+ *
+ * These files can be downloaded separately for convenience:
+ *     - <a href="http://lcvmwww.epfl.ch/software/cgDNAmc/repo/cgDNAparamset2.txt">`cgDNAparamset2.txt`</a>
+ *     -- the cgDNA parameter set used for simulations in the paper
+ *     - <a href="http://lcvmwww.epfl.ch/software/cgDNAmc/repo/save_parameter_set.m">`save_parameter_set.m`</a>
+ *     -- a Matlab/Octave script for saving cgDNA parameter set in the format
+ *     used by @ref build_seq_data.cpp (see function @ref load_cgdna_parameter_set())
+ *     - <a href="http://lcvmwww.epfl.ch/software/cgDNAmc/repo/save_seq_data.m">`save_seq_data.m`</a>
+ *     -- a Matlab/Octave script for saving cgDNA coefficients for a given DNA
+ *     sequence in the format used by the function
+ *     (see @ref run_cgDNAmc.cpp)
+ *     - <a href="http://lcvmwww.epfl.ch/software/cgDNAmc/repo/prepare_cgDNAmc.sh">`prepare_cgDNAmc.sh`</a>
+ *     -- a shell script that prepares the cgDNAmc project together with its
+ *     dependencies using the default settings (see @ref sec_build_script)
+ *     - <a href="http://lcvmwww.epfl.ch/software/cgDNAmc/examples/examples.zip">`examples.zip`</a>
+ *     --- example input files and generated output files of the example
+ *     runs of @ref build_seq_data.cpp and @ref run_cgDNAmc.cpp; all the files
+ *     are also available separately in the directory
+ *     <a href="http://lcvmwww.epfl.ch/software/cgDNAmc/examples">`examples`</a>;
+ *     these example files are not included in the repository
+ *
+ * @section sec_build Building
+ *
+ * Apart from standard C++ language libraries the package depends on the
+ * standard POSIX header `unistd.h` (for handling command line options) and two
+ * external codes <a href="http://lcvmwww.epfl.ch/software/algebra3d">algebra3d</a>
+ * and <a href="http://lcvmwww.epfl.ch/software/cgDNArecon">cgDNArecon</a>. An
+ * implementation of
+ * <a href="http://www.netlib.org/lapack/">LAPACK</a> is required (see
+ * @ref sec_lapack).
+ * The installation directory of
+ * <a href="http://lcvmwww.epfl.ch/software/algebra3d">algebra3d</a>
+ * and <a href="http://lcvmwww.epfl.ch/software/cgDNArecon">cgDNArecon</a>
+ * well as any other compilation settings (e.g. concerning "non-standard"
+ * location or necessary options for
+ * <a href="http://www.netlib.org/lapack/">LAPACK</a>) should be set in
+ * `Makefile.config`. Provided all compilation settings are set appropriately
+ * the code can be build simply by running
+ * @verbatim
+ $ make
+ @endverbatim
+ *
+ * @subsection sec_build_script Building script
+ * For convenience a shell script
+ * <a href="http://lcvmwww.epfl.ch/software/cgDNAmc/repo/prepare_cgDNAmc.sh">`prepare_cgDNAmc.sh`</a>
+ * is provided. To use it ZIP archives
+ * <a href="http://lcvmwww.epfl.ch/software/algebra3d/algebra3d.zip">algebra3d.zip</a>,
+ * <a href="http://lcvmwww.epfl.ch/software/cgDNArecon/cgDNArecon.zip">cgDNArecon.zip</a> and
+ * cgDNAmc should be placed in a directory. The script run in that directory
+ * unzips all the packages, performs the necessary modification in
+ * `Makefile.config`s to set the dependency paths and builds each project.
+ *
+ * The script can be seen as a reference of how the
+ * <a href="http://lcvmwww.epfl.ch/cgDNA">cgDNA</a> package and its
+ * dependencies should be set up. Modifications of the standard procedure might
+ * be required e.g. if <a href="http://www.netlib.org/lapack/">LAPACK</a> is not
+ * found by the compiler (liker) using default settings, or if a particular
+ * implementation of <a href="http://www.netlib.org/lapack/">LAPACK</a> is
+ * required (see @ref sec_lapack).
+ *
+ * In most cases the building procedure should boil down to placing the
+ * <a href="http://lcvmwww.epfl.ch/software/cgDNAmc/repo/prepare_cgDNAmc.sh">`prepare_cgDNAmc.sh`</a>
+ * in a directory where
+ * <a href="http://lcvmwww.epfl.ch/software/algebra3d/algebra3d.zip">algebra3d.zip</a>,
+ * <a href="http://lcvmwww.epfl.ch/software/cgDNArecon/cgDNArecon.zip">cgDNArecon.zip</a>
+ * and <a href="http://lcvmwww.epfl.ch/software/cgDNAmc/cgDNAmc.zip">cgDNAmc.zip</a> are
+ * located and running:
+ * @verbatim
+ $ bash prepare_cgDNAmc.sh
+ @endverbatim
+ * If this goes smoothly please refer directly to @ref sec_running. The
+ * remaining part of this section describes solutions to some possible problems.
+ *
+ * @subsection sec_lapack Possible problems with LAPACK
+ *
+ * The cgDNAmc package uses standard linear algebra routines defined by the
+ * <a href="http://www.netlib.org/blas/">BLAS</a> and
+ * <a href="http://www.netlib.org/lapack/">LAPACK</a> APIs
+ * (see <a href="http://www.netlib.org/lapack/#_presentation">this short
+ * description</a>). Any computer adapted to scientific computing most
+ * certainly has an implementation of the two installed, but apart from the
+ * reference implementations by
+ * <a href="http://www.netlib.org">netlib.org</a> there are many others that
+ * provide a more optimized versions of the subroutines, in particular for
+ * <a href="http://www.netlib.org/blas/">BLAS</a>. If you do not have any of
+ * those installed (or you do not know if you have them installed) try the
+ * <a href="http://www.openblas.net/">OpenBLAS</a> that provides an optimized
+ * implementation of both <a href="http://www.netlib.org/blas/">BLAS</a> and
+ * <a href="http://www.netlib.org/lapack/">LAPACK</a>
+ * routines and is very easy to install.
+ *
+ * The two examples below are just a reference of how the options in
+ * `Makefile.config` of cgDNAmc were modified by the author for two different
+ * computers to use <a href="http://www.openblas.net/">OpenBLAS</a> installed
+ * "manually" from sources. Particular other computers/operating systems might
+ * require other modifications.
+ *
+ * @subsubsection sec_lapack_linux Compiling on Linux using OpenBLAS
+ *
+ * The following `Makefile.config` is an example that uses
+ * <a href="http://www.openblas.net/">OpenBLAS</a> built from sources using
+ * GCC 4.8.4 and installed in `/opt/OpenBLAS-0.2.14`.
+ * <a href="http://lcvmwww.epfl.ch/software/algebra3d">algebra3d</a> and
+ * <a href="http://lcvmwww.epfl.ch/software/cgDNArecon">cgDNArecon</a> are installed
+ * "parallel" to cgDNAmc (see values of `ALG3D_DIR` and `CGDNA_RECON_DIR` below):
+ * @code
+ # The required environment variables
+
+ # Choose the compiler and compilation flags according to the needs
+ CXX = g++
+ CXXFLAGS = -O2 -fPIC -Wall
+
+ # The location of the algebra3d library
+ ALG3D_DIR = ../algebra3d
+
+ # The location of the cgDNArecon library
+ CGDNA_RECON_DIR = ../cgDNArecon
+
+ # Any additional includes (-I/.../...)
+ # This project requires:
+ # algebra3d (as defined)
+ # cgDNArecon (as defined)
+ ADDITIONAL_INC = -I$(ALG3D_DIR)/include \
+	-I$(CGDNA_RECON_DIR)/include
+
+ # Any additional linker flags (-L/.../... -l...)
+ # This project requires:
+ # std math library (e.g. -lm)
+ # blas (e.g. -lblas)
+ # lapack (e.g. -llapack)
+ # pthreads (e.g. -lpthread)
+ # algebra3d (as defined - static linking)
+ # cgDNArecon (as defined - static linking)
+ ADDITIONAL_LDFLAGS = -lm \
+	/opt/OpenBLAS-0.2.14/lib/libopenblas.a \
+	-lgfortran \
+	-lpthread \
+	$(ALG3D_DIR)/lib/libalgebra3d.a \
+	$(CGDNA_RECON_DIR)/lib/libcgDNArecon.a
+ @endcode
+ *
+ * @subsubsection sec_lapack_mac Compiling on Mac OS using OpenBLAS
+ *
+ * The following `Makefile.config` is an example that uses
+ * <a href="http://www.openblas.net/">OpenBLAS</a> built from sources using
+ * clang and gfortran 4.8.4 and installed  in `/opt/OpenBLAS-0.2.14`.
+ * <a href="http://lcvmwww.epfl.ch/software/algebra3d">algebra3d</a> and
+ * <a href="http://lcvmwww.epfl.ch/software/cgDNArecon">cgDNArecon</a> are installed
+ * "parallel" to cgDNAmc (see values of `ALG3D_DIR` and `CGDNA_RECON_DIR` below).
+ * <a href="http://lcvmwww.epfl.ch/software/algebra3d">algebra3d</a>,
+ * <a href="http://lcvmwww.epfl.ch/software/cgDNArecon">cgDNArecon</a> and cgDNAmc
+ * were built with GCC 4.8.4 installed from
+ * <a href="https://www.macports.org/">MacPorts</a>:
+ * @code
+ # The required environment variables
+
+ # Choose the compiler and compilation flags according to the needs
+ CXX = /opt/local/bin/g++-mp-4.8
+ CXXFLAGS = -O2 -fPIC -Wall
+
+ # The location of the algebra3d library
+ ALG3D_DIR = ../algebra3d
+
+ # The location of the cgDNArecon library
+ CGDNA_RECON_DIR = ../cgDNArecon
+
+ # Any additional includes (-I/.../...)
+ # This project requires:
+ # algebra3d (as defined)
+ # cgDNArecon (as defined)
+ ADDITIONAL_INC = -I$(ALG3D_DIR)/include \
+	-I$(CGDNA_RECON_DIR)/include
+
+ # Any additional linker flags (-L/.../... -l...)
+ # This project requires:
+ # std math library (e.g. -lm)
+ # blas (e.g. -lblas)
+ # lapack (e.g. -llapack)
+ # pthreads (e.g. -lpthread)
+ # algebra3d (as defined)
+ # cgDNArecon (as defined)
+ ADDITIONAL_LDFLAGS = -lm \
+	/Users/glowacki/opt/OpenBLAS-0.2.14/lib/libopenblas.a \
+	-L/opt/local/lib/gcc48/ -lgfortran \
+	$(ALG3D_DIR)/lib/libalgebra3d.a \
+	$(CGDNA_RECON_DIR)/lib/libcgDNArecon.a
+ @endcode
+ * The software has been tested on:
+ *     - Gentoo Linux Kernel 3.18.12
+ *         - Compiler used for GCC 4.8.4
+ *         - LAPACK:
+ *             - the reference implementation of
+ *             <a href="http://www.netlib.org/blas/">BLAS</a>
+ *             and <a href="http://www.netlib.org/lapack/">LAPACK</a>
+ *             - <a href="http://www.openblas.net/">OpenBLAS</a> installed from
+ *             sources (see @ref sec_lapack_linux)
+ *     - Mac OS X 10.7.5, Darwin Kernel Version 11.4.2
+ *         - Compiler used for GCC 4.8.4
+ *         - LAPACK:
+ *              - the reference implementation of
+ *              <a href="http://www.netlib.org/blas/">BLAS</a>
+ *              and <a href="http://www.netlib.org/lapack/">LAPACK</a>
+ *              - <a href="http://www.openblas.net/">OpenBLAS</a> installed from
+ *              sources (see @ref sec_lapack_mac)
+ *
+ * @section sec_running Running
+ *
+ * A simulation using cgDNAmc requires a preliminary step of preparing
+ * <a href="http://lcvmwww.epfl.ch/cgDNA">cgDNA</a> for a chosen sequence. This
+ * can be done using the @ref build_seq_data.cpp code.
+ *
+ * When <a href="http://lcvmwww.epfl.ch/cgDNA">cgDNA</a> parameters are ready
+ * the simulation itself can be run using the @ref run_cgDNAmc.cpp code.
+ *
+ * Instructions on running both binaries as well as example execution calls can
+ * be found in their respective documentations (at @ref build_seq_data.cpp and
+ * @ref run_cgDNAmc.cpp). Example input files and generated output files of
+ * those example runs are available in the directory
+ * <a href="http://lcvmwww.epfl.ch/software/cgDNAmc/examples">`examples`</a>
+ * separately or as a ZIP archive
+ * <a href="http://lcvmwww.epfl.ch/software/cgDNAmc/examples/examples.zip">`examples.zip`</a>.
+ *
+ * @subsection sec_parallel Parallelization
+ *
+ * In cgDNAmc pseudo-random numbers need to be generated sequentially to ensure
+ * the generator works correctly and to assure reproducibility of results. Also
+ * the procedure of reconstructing base pair positions @f$\mathbf{r}_i@f$ and
+ * orientations @f$\mathbf{R}_i@f$ from a configuration @f$\mathbf{w}@f$ is
+ * inherently sequential. The conversion of the decoupled normal deviates
+ * @f$\mathbf{y}@f$ to an internal coordinate vector @f$\mathbf{w}@f$ depends
+ * on the underlying implementation of the
+ * <a href="http://www.netlib.org/lapack/">LAPACK</a> routine, that might
+ * already be optimized to use multiple cores. Evaluation of expectations can
+ * easily be parallelized, however, for a single configuration calculation of
+ * expectations takes a very short time (around 0.5 μs up to 0.3 ms on
+ * a contemporary laptop) that is comparable to the overhead of setting up
+ * parallelization. For that reason the cgDNAmc code has no explicit
+ * parallelization.
+ *
+ * Note however that each configuration can be generated and analysed
+ * independently of all others. As a result the suggested solution for
+ * generating large ensembles is to run multiple simulations at the same time.
+ * Even a simulation for a single molecule can be split into multiple machines
+ * (e.g., within a cluster), provided that a different seed is used for the
+ * pseudo-random number generator on each machine. Thanks to their linearity
+ * expectations from multiple runs can be aggregated as a weighted average with
+ * weights proportional to the number of configurations generated in each
+ * particular run. In fact a speed-up should be expected even when running
+ * multiple simulations on a single, multi-core processor. For example the
+ * speed-up achieved on a contemporary laptop (dual core, running 4 threads)
+ * for 4 simulations running at the same time can be about 2.4.
+ *
+ * @section sec_cite How to cite
+ *
+ * If you find this code useful please cite:
+ *
+ * Jonathan S. Mitchell, Jaroslaw Glowacki, Alexandre E. Grandchamp, Robert S. Manning, and John H. Maddocks,
+ * <BR>
+ * <I>Sequence-dependent persistence lengths of DNA</I>
+ * <BR>
+ * J. Chem. Theory Comput. (2016)
+ *
+ * DOI: <a href="http://doi.org/10.1021/acs.jctc.6b00904">10.1021/acs.jctc.6b00904</a>
+ *
+ * <HR>
+ *
+ * @copyright Copyright 2016 Jaroslaw Glowacki<BR>
+ * jarek (dot) glowacki (at) gmail (dot) com <BR>
+ * <BR>
+ * This program is free software: you can redistribute it and/or modify<BR>
+ * it under the terms of the GNU General Public License as published by<BR>
+ * the Free Software Foundation, either version 3 of the License, or<BR>
+ * (at your option) any later version.<BR>
+ * <BR>
+ * cgDNAmc is distributed in the hope that it will be useful,<BR>
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of<BR>
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<BR>
+ * GNU General Public License for more details.<BR>
+ * <BR>
+ * You should have received a copy of the GNU General Public License<BR>
+ * along with cgDNAmc.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @image html http://www.gnu.org/graphics/gplv3-127x51.png
+ */
+

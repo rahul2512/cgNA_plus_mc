@@ -1,0 +1,43 @@
+data/inc/reconstruct.h.i
+data/README.TXT.i
+data/reconstruct TesterStatic.launch.i
+data/gpl.txt.i
+data/include/uvwrecon/reconstruct.h.i
+data/include/uvwrecon/Doxyfile.i
+data/reconstruct computeParams.launch.i
+data/Makefile.i
+data/include/recon/reconstruct.h.i
+data/src/Vector.cpp.i
+data/test/MatrixTest.cpp.i
+data/Doxyfile.i
+data/Makefile.dev.i
+data/inc/global.h.i
+data/test/ReconstructTest.cpp.i
+data/src/global.cpp.i
+data/inc/Vector.h.i
+data/include/cgDNArecon/reconstruct.h.i
+data/include/recon/Doxyfile.i
+data/test/VectorTest.cpp.i
+data/src/computeParams.cpp.i
+data/inc/Doxyfile.i
+data/src/Quaternion.cpp.i
+data/include/cgDNArecon/main_page.dox.i
+data/reconstruct computeParamsStatic.launch.i
+data/test/params.txt.i
+data/Makefile.config.i
+data/src/timing.cpp.i
+data/Makefile.macos.i
+data/test/RotationTest.cpp.i
+data/test/Tester.cpp.i
+data/inc/Quaternion.h.i
+data/inc/Matrix.h.i
+data/src/reconstruct.cpp.i
+data/include/Doxyfile.i
+data/test/generateTestData.m.i
+data/src/Matrix.cpp.i
+data/reconstruct Tester.launch.i
+data/test/QuaternionTest.cpp.i
+data/test/data.txt.i
+data/Makefile.use.i
+data/test/Tester.h.i
+data/test/GlobalTest.cpp.i

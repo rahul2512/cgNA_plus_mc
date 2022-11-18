@@ -1,0 +1,139 @@
+/**
+ * @mainpage
+ *
+ * @section sec_desc Description
+ *
+ * A small library to provide algebraic operations on vectors in 3D space.
+ * The package defines only 3 template classes:
+ *     @li #algebra3d#Vector3 \<fpType\> - for vectors in 3D space; to represent positions
+ *     in 3D and also rotations (Cayley vectors);
+ *     @li #algebra3d#Matrix3 \<fpType\> - 3 by 3 matrices to represent rotations;
+ *     @li #algebra3d#Quaternion \<fpType\> - to represent rotations; added for
+ *     efficiency
+ *
+ * Each of the template types is specialized only for double and float,
+ * i.e. only the following types can be used (these are typedefs for
+ * abbreviation):
+ *     @li #algebra3d#Vector3D (equiv. to #algebra3d#Vector3 \<double\>)
+ *     @li #algebra3d#Vector3F (equiv. to #algebra3d#Vector3 \<float\>);
+ *     @li #algebra3d#Matrix3D (equiv. to #algebra3d#Matrix3 \<double\>)
+ *     @li #algebra3d#Matrix3F (equiv. to #algebra3d#Matrix3 \<float\>);
+ *     @li #algebra3d#QuaternionD (equiv. to #algebra3d#Quaternion \<double\>)
+ *     @li #algebra3d#QuaternionF (equiv. to #algebra3d#Quaternion \<float\>).
+ *
+ * In addition some helper functions are defined in global.h. Some of those are
+ * fully defined in the header to make it possible for the compiler to inline
+ * them.
+ *
+ * @section sec_download Download
+ *
+ * The library can be obtained either by cloning the static
+ * <a href="http://mercurial.selenic.com/">Mercurial 2.8.1</a> repository:
+ * @verbatim
+ hg clone http://lcvmwww.epfl.ch/software/algebra3d/repo algebra3d
+ @endverbatim
+ * or downloading a
+ * <a href="http://lcvmwww.epfl.ch/software/algebra3d/algebra3d.zip">ZIP archive</a>.
+ *
+ * @section sec_build Building
+ *
+ * The library has no extra dependencies. Any extra compilation settings should
+ * be set in `Makefile.config`. Provided all compilation setting are set
+ * appropriately the code can be build simply by running
+ * @verbatim
+ $ make
+ @endverbatim
+ * which creates the following files:
+ *     @li `./lib/libalgebra3d.a` -- a static library
+ *     @li `./lib/libalgebra3d.so` -- a dynamic library
+ *
+ * @note On MacOS if you want to move the dynamic library to another location
+ * remember that dynamic libraries on Mac have their path stored internally.
+ * To see the current information use
+ * @verbatim
+ $ otool -L /path/to/where/it/is/lib/libalgebra3d.so
+ @endverbatim
+ * To modify the install path use
+ * @verbatim
+ $ install_name_tool -id /new/location/libalgebra3d.so /new/location/libalgebra3d.so
+ @endverbatim
+ * If you want just to rename the file to libalgebra3d.dylib (to use the MacOS
+ * convention) you would also need to do the above.
+ * To save yourself trouble you can also just use the static library.
+ *
+ * The software has been tested on:
+ *     @li Gentoo Linux Kernel 3.18.12, g++ 4.8.4
+ *     @li Mac OS X 10.7.5, Darwin Kernel Version 11.4.2, g++ 4.2
+ *
+ * @section sec_tests Tests
+ *
+ * The library has a set of unit tests based on
+ * <a href="http://sourceforge.net/projects/cppunit/">CppUnit 1.12.1</a>.
+ * To build the tests you need to have CppUnit available in your include path
+ * and library path. If it is not in your default paths add what is necessary
+ * to `Makefile.config`.
+ *
+ * To build the tests use
+ * @verbatim
+ $ make all_test
+ @endverbatim
+ * In addition to the results of products of the default build rule this will
+ * create test binaries:
+ *     @li `./bin/TesterD` -- double precision version of tests for dynamic
+ *     library
+ *     @li `./bin/TesterF` -- single precision version of tests for dynamic
+ *     library
+ *     @li `./bin/TesterStaicD` -- double precision version of tests for static
+ *     library
+ *     @li `./bin/TesterStaticF` -- single precision version of tests for static
+ *     library
+ *
+ * The static and dynamic versions are exactly the same, they are both built to
+ * test static and dynamic linking. The pertinent rules in the `Makefile` might
+ * be of interest.
+ *
+ * @section sec_timing Timing
+ *
+ * A simple program for running performance tests is available in
+ * `src/timing.cpp`. This is not compiled by the default `make` rule, but can
+ * be built by:
+ * @verbatim
+ $ make timing
+ @endverbatim
+ * which builds two binaries:
+ *     @li `./bin/timingD` -- a binary for timing double precision computations
+ *     @li `./bin/timingF` -- a binary for timing single precision computations
+ *
+ * @section sec_cite How to cite
+ *
+ * If you find this code useful please cite:
+ *
+ * Jonathan S. Mitchell, Jaroslaw Glowacki, Alexandre E. Grandchamp, Robert S. Manning and John H. Maddocks,
+ * <BR>
+ * <I>Sequence-dependent persistence lengths of DNA</I>
+ * <BR>
+ * submitted.
+ *
+ * DOI: <a href="http://doi.org/?" >?</a>
+ *
+ * <HR>
+ *
+ * @copyright Copyright 2015 Jaroslaw Glowacki<BR>
+ * jarek (dot) glowacki (at) gmail (dot) com <BR>
+ * <BR>
+ * This program is free software: you can redistribute it and/or modify<BR>
+ * it under the terms of the GNU General Public License as published by<BR>
+ * the Free Software Foundation, either version 3 of the License, or<BR>
+ * (at your option) any later version.<BR>
+ * <BR>
+ * algebra3d is distributed in the hope that it will be useful,<BR>
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of<BR>
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<BR>
+ * GNU General Public License for more details.<BR>
+ * <BR>
+ * You should have received a copy of the GNU General Public License<BR>
+ * along with algebra3d.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @image html http://www.gnu.org/graphics/gplv3-127x51.png
+ */
+ 

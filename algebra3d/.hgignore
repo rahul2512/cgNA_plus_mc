@@ -1,0 +1,11 @@
+.hgignore
+.cproject
+.project
+relre:./*.launch
+relre:.settings/*
+
+relre:bin/*
+relre:build/*
+relre:doc/*
+relre:lib/*
+

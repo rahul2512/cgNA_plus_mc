@@ -1,0 +1,33 @@
+# The required environment variables
+
+# Choose the compiler and compilation flags according to the needs
+CXX = g++
+CXXFLAGS = -O2 -fPIC -Wall 
+
+# The location of the algebra3d library
+ALG3D_DIR = ../algebra3d
+
+# The location of the cgDNArecon library
+CGDNA_RECON_DIR = ...
+
+# Any additional includes (-I/.../...)
+# This project requires:
+# algebra3d (as defined)
+# cgDNArecon (as defined)
+ADDITIONAL_INC = -I$(ALG3D_DIR)/include \
+	-I$(CGDNA_RECON_DIR)/include
+
+# Any additional linker flags (-L/.../... -l...)
+# This project requires:
+# std math library (e.g. -lm)
+# blas (e.g. -lblas)
+# lapack (e.g. -llapack)
+# pthreads (e.g. -lpthread)
+# algebra3d (as defined)
+# cgDNArecon (as defined)
+ADDITIONAL_LDFLAGS = -lm \
+	-lblas -llapack \
+	-lpthread \
+	$(ALG3D_DIR)/lib/libalgebra3d.a \
+	$(CGDNA_RECON_DIR)/lib/libcgDNArecon.a
+

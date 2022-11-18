@@ -1,0 +1,49 @@
+data/inc/reconstruct.h.i
+data/README.TXT.i
+data/reconstruct TesterStatic.launch.i
+data/include/algebra3d/Matrix3.h.i
+data/gpl.txt.i
+data/reconstruct computeParams.launch.i
+data/test/Vector3Test.cpp.i
+data/test/data.txt.i
+data/src/Vector3.cpp.i
+data/Makefile.i
+data/src/Vector.cpp.i
+data/inc/algebra3d/Vector.h.i
+data/Doxyfile.i
+data/Makefile.dev.i
+data/inc/global.h.i
+data/test/ReconstructTest.cpp.i
+data/src/global.cpp.i
+data/inc/Vector.h.i
+data/include/algebra3d/main_page.dox.i
+data/include/algebra3d/Doxyfile.i
+data/test/VectorTest.cpp.i
+data/include/algebra3d/Quaternion.h.i
+data/src/computeParams.cpp.i
+data/inc/Doxyfile.i
+data/src/Quaternion.cpp.i
+data/inc/algebra3d/Doxyfile.i
+data/reconstruct computeParamsStatic.launch.i
+data/test/params.txt.i
+data/Makefile.config.i
+data/src/timing.cpp.i
+data/test/RotationTest.cpp.i
+data/test/Tester.cpp.i
+data/inc/Quaternion.h.i
+data/inc/algebra3d/Quaternion.h.i
+data/inc/Matrix.h.i
+data/src/reconstruct.cpp.i
+data/include/algebra3d/global.h.i
+data/include/algebra3d/Vector3.h.i
+data/inc/algebra3d/global.h.i
+data/src/Matrix.cpp.i
+data/test/Matrix3Test.cpp.i
+data/reconstruct Tester.launch.i
+data/src/Matrix3.cpp.i
+data/test/QuaternionTest.cpp.i
+data/inc/algebra3d/Matrix.h.i
+data/Makefile.use.i
+data/test/MatrixTest.cpp.i
+data/test/Tester.h.i
+data/test/GlobalTest.cpp.i

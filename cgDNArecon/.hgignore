@@ -1,0 +1,10 @@
+.hgignore
+.cproject
+.project
+relre:./*.launch
+relre:.settings/*
+
+relre:./doc/*
+relre:./build/*
+relre:./test/gen/*
+
