@@ -1,14 +1,19 @@
-README
+#README
+
 -------------------------------------------------------
  cgNA+mc C++ (2022) --- developed at LCVMM, EPFL (https://lcvmwww.epfl.ch/)
 -------------------------------------------------------  
+
 cgNA+mc code is the evolution of the cgDNA Monte Carlo code developed in the LCVMM lab (Prof. John H. Maddocks) at EPFL.
 This C++ package is originally developed by Jaroslaw Glowacki (jarek.glowacki@gmail.com) corresponding to the cgDNA model.
 The current version cgNA+mc is extended by Alessandro patelli and Rahul Sharma.
 Public version: last updated by Rahul Sharma (rs25.iitr@gmail.com, rahul.sharma@epfl.ch) on Nov 2022
+
 -------------------------------------------------------
+
 If you use this code in any publication, please cite
 Mitchell, Jonathan S., Jaroslaw Glowacki, Alexandre E. Grandchamp, Robert S. Manning, and John H. Maddocks. "Sequence-dependent persistence lengths of DNA." Journal of chemical theory and computation 13, no. 4 (2017): 1539-1555.
+
 ------------------------------------------------------- 
 
 
