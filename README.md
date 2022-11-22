@@ -4,7 +4,7 @@
  cgNA+mc C++ (2022) --- developed at LCVMM, EPFL (https://lcvmwww.epfl.ch/)
 -------------------------------------------------------  
 
-cgNA+mc code is the evolution of the cgDNA Monte Carlo code developed in the LCVMM lab (Prof. John H. Maddocks) at EPFL.
+cgNA+mc code is the evolution of the cgDNA Monte Carlo code developed in the LCVMM lab (supervised by Prof. John H. Maddocks) at EPFL.
 This C++ package is originally developed by Jaroslaw Glowacki (jarek.glowacki@gmail.com) corresponding to the cgDNA model.
 The current version cgNA+mc is extended by Alessandro patelli and Rahul Sharma.
 Public version: last updated by Rahul Sharma (rs25.iitr@gmail.com, rahul.sharma@epfl.ch) on Nov 2022
@@ -15,7 +15,15 @@ If you use this code in any publication, please cite
 Mitchell, Jonathan S., Jaroslaw Glowacki, Alexandre E. Grandchamp, Robert S. Manning, and John H. Maddocks. "Sequence-dependent persistence lengths of DNA." Journal of chemical theory and computation 13, no. 4 (2017): 1539-1555.
 
 ------------------------------------------------------- 
+cgNA+mc code 
+This package allows for running Monte Carlo (MC) simulations of dsNA molecules using 
+the cgNA+ nearest-neighbour rigid base and rigid phosphate model. 
+The code allows for direct MC sampling from a Gaussian distribution. 
 
+The underlying cgNA+ model is described in the nest section. 
+------------------------------------------------------- 
+
+cgNA+ model
 
 cgNA+ is a software (Matlab or Octave or Python) package for
 predicting the ground-state conformation and stiffness
@@ -73,7 +81,7 @@ Run the examples_i.py in Examples directory and also see the basic description o
 For more details, please read the codes in functions directory. 
 
 %-------------------------------------------------------
-% cgDNA package contents
+% cgNA+mc package contents
 %-------------------------------------------------------
 Four basic directories:
 1. Functions: contains all the necessary functions
@@ -81,48 +89,6 @@ Four basic directories:
 3. Examples: contains all the input files and output file for few example sequences. 
 4. work: This is the working directory. You can change its name and just change the necessary 
 	 updates in the input.py file. 
-
-Then there are two text files: 1. README(this file) 2. INSTALLATION file 
-
-1. Functions: 
-
-a) constructSeqParms.py : This function predicts the groundstate and stiffness matrix of the input sequence. 
-			  To obtain the results in .mat format; uncomment last line of this script.
-			  
-b) vector2shapes.py     : This function re-orders the ground-state coordinates.
-c) frames.py		: Given a ground-state coordinate vector in non-dimensional Curves+ form, this 
-                          function constructs a reference point and frame for each base on each strand of 
-		          the DNA according to the Tsukuba convention.    
-d) seq_edit.py  	: Given the compacted input sequence, this function expands it. 
-e) wcc.py 		: Given the input watson strand, it gives Crick strand or vice-versa. 
-f) cgDNA2dplot.py       : Given the input data for the sequence(s), it plots the ground-state 
-			  coordinates to the screen for all the input sequences. 
-			  To create publication quality plots: inter.png and intra.png in 1200dpi.
-				uncomment last two line in this script.  
-g) cgDNA3dplot.py	: This function plots the 3D reconstruction of the ground states as rigid
- 			  bodies colored according to the sequence and the Crick Watson pairing
-			  To create a 1200 dpi png with the name "3D.png".
-h) cgDNA_MonteCarlo.py  : This function draws a given number of configurations from the cgDNA probability 
-			  density function for the sequence(s) in the given Data structure.
-			  This also calculates apparent and dynamic persistent lengths for the given input
-			  sequence. One can also obtain the tangent-tangent correlation data. 
-i) makepdb.py           : This function constructs the ideal coordinates of the non-hydrogen atoms of each 
-			  base according to the Tsukuba definition, and writes the output to a PDB file 
-			  (backbone atoms are not included).  
-j) shapes2vec.py        : This function re-orders any configuration coordinates.
-k) nondim2cur.py        : This function transforms the ground-state coordinates from non-dimensional 
-			  Curves+ form to the standard (dimensional) Curves+ form.
-
-l) ideal_bases.txt      : The text file with the ideal coordinates (in base frame) of the non-hydrogen 
-			  atoms of the bases T, A, C, G, U, M, N, H, K.
-
-2. Parametersets	: Several parameter sets derived from different MD simulations sets and for variety of nucleic acids (see more details below)
-
-3. work   		: you can rename it to any directory and work but you must have input.py in this 
-			  directory to run cgDNA and the keyword "current_dir" should be assigned the name
-			  of this woring directory. 
-4. Examples		: This file contains two sample sequences and all the outputs. One can use this 
-			  example as a template for further use. 
 
 
 
