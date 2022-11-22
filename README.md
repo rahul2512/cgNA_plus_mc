@@ -1,5 +1,5 @@
 README
--------------------------------------------------------
+#-------------------------------------------------------
  cgNA+mc C++ (2022) --- developed at LCVMM, EPFL (https://lcvmwww.epfl.ch/)
 -------------------------------------------------------  
 cgNA+mc code is the evolution of the cgDNA Monte Carlo code developed in the LCVMM lab (Prof. John H. Maddocks) at EPFL.
